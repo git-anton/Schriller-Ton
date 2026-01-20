@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Lab - Frequenz Generator</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            justify-content: center;
+        }
+
+        button {
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        #playBtn {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        #playBtn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        #playBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #stopBtn {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        #stopBtn:hover {
+            background-color: rgba(239, 68, 68, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .slider-section {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .value-display {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .label {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        /* Custom Slider Styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #334155;
+            border-radius: 5px;
+            outline: none;
+            margin: 20px 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            cursor: pointer;
+            border-radius: 50%;
+            border: 3px solid var(--card-bg);
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            transition: transform 0.1s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .visualizer {
+            display: flex;
+            justify-content: center;
+            gap: 3px;
+            height: 30px;
+            margin-top: 1.5rem;
+            align-items: center;
+        }
+
+        .bar {
+            width: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+            height: 20%;
+            transition: height 0.1s ease;
+        }
+
+        .active .bar {
+            animation: bounce 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { height: 20%; }
+            to { height: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Audio Lab</h1>
+    <p>Interaktiver Sinus-Generator</p>
+
+    <div class="controls">
+        <button id="playBtn">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            Start
+        </button>
+        <button id="stopBtn">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+            Stop
+        </button>
+    </div>
+
+    <div class="slider-section">
+        <span class="label">Frequenz</span>
+        <div class="value-display"><span id="sliderValue">5000</span><span style="font-size: 1rem; margin-left: 4px;">Hz</span></div>
+        <input type="range" id="mySlider" min="100" max="15000" step="1" value="5000">
+        
+        <div class="visualizer" id="visualizer">
+            <div class="bar" style="animation-delay: 0.1s"></div>
+            <div class="bar" style="animation-delay: 0.2s"></div>
+            <div class="bar" style="animation-delay: 0.3s"></div>
+            <div class="bar" style="animation-delay: 0.4s"></div>
+            <div class="bar" style="animation-delay: 0.5s"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let audioCtx;
+    let oscillator;
+    let gainNode;
+
+    const playBtn = document.getElementById("playBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const slider = document.getElementById("mySlider");
+    const output = document.getElementById("sliderValue");
+    const visualizer = document.getElementById("visualizer");
+
+    function updateFrequence(val) {
+        output.textContent = val;
+        if (oscillator && audioCtx.state === 'running') {
+            // "exponentialRampToValueAtTime" verhindert Knackgeräusche beim Schieben
+            oscillator.frequency.setTargetAtTime(val, audioCtx.currentTime, 0.05);
+        }
+    }
+
+    playBtn.addEventListener("click", () => {
+        if (audioCtx) return;
+
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        oscillator = audioCtx.createOscillator();
+        gainNode = audioCtx.createGain();
+
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(slider.value, audioCtx.currentTime);
+
+        // Sanftes Einblenden (Fade-in)
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.1);
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.start();
+        
+        playBtn.disabled = true;
+        visualizer.classList.add('active');
+    });
+
+    stopBtn.addEventListener("click", () => {
+        if (audioCtx) {
+            // Sanftes Ausblenden (Fade-out)
+            gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
+            
+            setTimeout(() => {
+                if (oscillator) {
+                    oscillator.stop();
+                    oscillator.disconnect();
+                }
+                if (audioCtx) {
+                    audioCtx.close().then(() => {
+                        audioCtx = null;
+                        oscillator = null;
+                        playBtn.disabled = false;
+                        visualizer.classList.remove('active');
+                    });
+                }
+            }, 100);
+        }
+    });
+
+    slider.addEventListener("input", function() {
+        updateFrequence(this.value);
+    });
+</script>
+
+</body>
+</html>
